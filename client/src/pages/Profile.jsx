@@ -7,9 +7,19 @@ import {
   uploadBytesResumable,
 } from "firebase/storage";
 import { app } from "../firebase";
-import { updateUserStart, updateUserFailure, updateUserSuccess, deleteUserFailure , deleteUserStart, deleteUserSuccess, signOutUserStart, signOutUserFailure, signOutUserSuccess} from "../redux/user/userSlice";
+import {
+  updateUserStart,
+  updateUserFailure,
+  updateUserSuccess,
+  deleteUserFailure,
+  deleteUserStart,
+  deleteUserSuccess,
+  signOutUserStart,
+  signOutUserFailure,
+  signOutUserSuccess,
+} from "../redux/user/userSlice";
 import { useDispatch } from "react-redux";
-import {Link} from 'react-router-dom'
+import { Link } from "react-router-dom";
 
 export default function Profile() {
   const fileRef = useRef(null);
@@ -19,6 +29,8 @@ export default function Profile() {
   const [uploadStatus, setUploadStatus] = useState(null);
   const [formData, setFormData] = useState({});
   const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [showListingsError, setShowListingsError] = useState(false);
+  const [userListings, setUserListings] = useState([]);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -64,14 +76,14 @@ export default function Profile() {
     try {
       dispatch(updateUserStart());
       const res = await fetch(`/api/user/update/${currentUser._id}`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-      if(data.success === false){
+      if (data.success === false) {
         dispatch(updateUserFailure(data.message));
         return;
       }
@@ -86,25 +98,25 @@ export default function Profile() {
     try {
       dispatch(deleteUserStart());
       const res = await fetch(`/api/user/delete/${currentUser._id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
       const data = await res.json();
-      if(data.success === false){
+      if (data.success === false) {
         dispatch(deleteUserFailure(data.message));
         return;
       }
       dispatch(deleteUserSuccess(data));
     } catch (error) {
-      dispatch(deleteUserFailure(error.message))
+      dispatch(deleteUserFailure(error.message));
     }
-  }
+  };
 
   const handleSignOut = async () => {
     try {
       dispatch(signOutUserStart());
-      const res = await fetch('/api/auth/signout');
+      const res = await fetch("/api/auth/signout");
       const data = res.json();
-      if(data.success === false){
+      if (data.success === false) {
         dispatch(signOutUserFailure(data.message));
         return;
       }
@@ -112,7 +124,22 @@ export default function Profile() {
     } catch (error) {
       dispatch(signOutUserFailure(error.message));
     }
-  }
+  };
+
+  const handleShowListings = async () => {
+    try {
+      setShowListingsError(false);
+      const res = await fetch(`/api/user/listings/${currentUser._id}`);
+      const data = await res.json();
+      if (data.success === false) {
+        setShowListingsError(true);
+        return;
+      }
+      setUserListings(data);
+    } catch (error) {
+      setShowListingsError(true);
+    }
+  };
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
@@ -168,19 +195,64 @@ export default function Profile() {
           className="border p-3 rounded-lg"
           onChange={handleChange}
         />
-        <button disabled={loading} className="bg-slate-700 text-white rounded-lg p-3 uppercase hover:opacity-95 disabled:opacity-80">
-          {loading ? 'Loading...' : 'Update'}
+        <button
+          disabled={loading}
+          className="bg-slate-700 text-white rounded-lg p-3 uppercase hover:opacity-95 disabled:opacity-80"
+        >
+          {loading ? "Loading..." : "Update"}
         </button>
-        <Link className="bg-emerald-700 p-3 rounded-lg text-white text-center uppercase hover:opacity-95" to={"/create-listing"}>
+        <Link
+          className="bg-emerald-700 p-3 rounded-lg text-white text-center uppercase hover:opacity-95"
+          to={"/create-listing"}
+        >
           Create Listing
         </Link>
       </form>
       <div className="flex justify-between mt-5">
-        <span className="text-red-700 cursor-pointer" onClick={handleDeleteUser}>Delete Account</span>
-        <span className="text-red-700 cursor-pointer" onClick={handleSignOut}>Sign Out</span>
+        <span
+          className="text-red-700 cursor-pointer"
+          onClick={handleDeleteUser}
+        >
+          Delete Account
+        </span>
+        <span className="text-red-700 cursor-pointer" onClick={handleSignOut}>
+          Sign Out
+        </span>
       </div>
-      <p className="text-red-700 mt-5">{error ? error : '' }</p>
-      <p className="text-green-700 mt-5">{updateSuccess ? 'User Updated Successfully' : '' }</p>
+      <p className="text-red-700 mt-5">{error ? error : ""}</p>
+      <p className="text-green-700 mt-5">
+        {updateSuccess ? "User Updated Successfully" : ""}
+      </p>
+      <button
+        className="text-blue-700 w-full hover:shadow-lg"
+        onClick={handleShowListings}
+      >
+        Show listings
+      </button>
+      <p className="text-red-700 mt-5">
+        {showListingsError ? "Error showing listings" : ""}
+      </p>
+        {userListings &&
+          userListings.length > 0 && 
+          <div className="flex flex-col gap-4">
+            <h1 className="text-center text-2xl font-semibold mt-7">Your Listings</h1>
+          {userListings.map((listing) => (
+            <div key={listing._id} className="border rounded-lg p-3 flex justify-between items-center gap-4">
+              <Link to={`/listing/${listing._id}`}>
+                <img className="h-16 w-16 object-contain rounded-lg" src={listing.imageUrls[0]} alt="listing cover" />
+              </Link>
+              <Link to={`/listing/${listing._id}`} className="text-slate-700 font-semibold hover:underline truncate flex-1">
+                <p>{listing.name}</p>
+              </Link>
+              <div className="flex flex-col items-center">
+                <button className="text-gray-700 uppercase">Edit</button>
+                <button className="text-red-700 uppercase">Delete</button>
+              </div>
+            </div>
+          ))}
+          </div>
+        }
+          
     </div>
   );
 }

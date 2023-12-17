@@ -37,29 +37,23 @@ function CreateListing() {
         type: e.target.id,
       });
     }
-    if (
-      e.target.id === "parking" ||
-      e.target.id === "furnished" ||
-      e.target.id === "offer"
-    ) {
+    if (e.target.id === "parking" || e.target.id === "furnished" || e.target.id === "offer") {
       setFormData({
         ...formData,
         [e.target.id]: e.target.checked,
       });
     }
-
-    if (
-      e.target.type === "text" ||
-      e.target.type === "number" ||
-      e.target.type === "textarea"
-    ) {
+  
+    if (e.target.type === "text" || e.target.type === "number" || e.target.type === "textarea") {
       const value = e.target.id === "regularPrice" ? +e.target.value : e.target.value;
+      const id = e.target.id === "bedrooms" ? "bedRooms" : e.target.id === "bathrooms" ? "bathRooms" : e.target.id;
       setFormData({
         ...formData,
         [e.target.id]: value,
       });
     }
   };
+  
 
   const [imageUploadError, setImageUploadError] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -254,7 +248,7 @@ function CreateListing() {
             <div className="flex items-center gap-2">
               <input
                 type="number"
-                id="bedrooms"
+                id="bedRooms"
                 min="1"
                 max="10"
                 required
@@ -267,7 +261,7 @@ function CreateListing() {
             <div className="flex items-center gap-2">
               <input
                 type="number"
-                id="bathrooms"
+                id="bathRooms"
                 min="1"
                 max="10"
                 required
@@ -282,7 +276,7 @@ function CreateListing() {
                 type="number"
                 id="regularPrice"
                 min="50"
-                max="10000000"
+                max="100000000"
                 required
                 className="p-3 border border-gray-300 rounded-lg"
                 onChange={handleChange}
@@ -290,7 +284,7 @@ function CreateListing() {
               />
               <div className="flex flex-col items-center">
                 <p>Regular Price</p>
-                <span className="text-xs">($ / month)</span>
+                {formData.type === "rent" && <span className="text-xs">($ / month)</span>}
               </div>
             </div>
             {formData.offer && (
@@ -299,7 +293,7 @@ function CreateListing() {
                   type="number"
                   id="discountPrice"
                   min="0"
-                  max="100000"
+                  max="10000000"
                   required
                   className="p-3 border border-gray-300 rounded-lg"
                   onChange={handleChange}
@@ -307,7 +301,7 @@ function CreateListing() {
                 />
                 <div className="flex flex-col items-center">
                   <p>Discounted Price</p>
-                  <span className="text-xs">($ / month)</span>
+                  {formData.type === "rent" && <span className="text-xs">($ / month)</span>}
                 </div>
               </div>
             )}

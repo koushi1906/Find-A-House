@@ -92,7 +92,7 @@ export const Listing = () => {
             <ul className="text-green-900 font-semibold text-sm flex flex-wrap items-center gap-4 sm:gap-6">
               <li className="flex items-center gap-1 whitespace-nowrap">
                 <FaBed className="text-lg" />
-                {listing.bedrooms > 1
+                {listing.bedRooms > 1
                   ? `${listing.bedRooms} beds`
                   : `${listing.bedRooms} bed`}
               </li>

@@ -98,12 +98,13 @@ export default function Home() {
               </Link>
             </div>
             <div className="flex flex-wrap gap-4">
-              {offerListings.map((listing) => {
-                <Listingitem listing={listing} key={listing._id} />;
-              })}
+              {offerListings.map((listing) => (
+                <Listingitem listing={listing} key={listing._id} />
+              ))}
             </div>
           </div>
         )}
+
         {rentListings && rentListings.length > 0 && (
           <div className="">
             <div className="my-3">

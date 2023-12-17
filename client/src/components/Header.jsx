@@ -56,7 +56,7 @@ const Header = () => {
             {currentUser ? (
               <img src={currentUser.avatar} alt="profile"  className="rounded h-7 w-7 object-cover"/>
             ) : (
-              <li className="hidden sm:inline text-slate-700 hover:underline cursor-pointer">
+              <li className="text-slate-700 hover:underline cursor-pointer">
                 Sign In
               </li>
             )}
